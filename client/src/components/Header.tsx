@@ -13,6 +13,7 @@ const Header = () => {
   };
   
   const routes = [
+    { path: "/", label: "Welcome" },
     { path: "/home", label: "Home" },
     { path: "/visualizations", label: "Visualizations" },
     { path: "/about", label: "About" }
@@ -24,14 +25,14 @@ const Header = () => {
     <header className="bg-[#006747] text-white shadow-md">
       <div className="bg-[#D9F2EA] py-1">
         <div className="container mx-auto px-4 flex justify-end">
-          <span className="text-xs font-medium text-[#006747]">Parking Management System</span>
+          <span className="text-xs font-medium text-[#006747]">USFParkingApp</span>
         </div>
       </div>
       <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <Car className="h-6 w-6 text-white" />
           <Link href="/" className="text-xl font-medium">
-            Parking App
+            USFParkingApp
           </Link>
         </div>
         
@@ -70,7 +71,7 @@ const Header = () => {
               <div className="flex flex-col space-y-4 mt-6">
                 <div className="flex items-center space-x-2 mb-6">
                   <Car className="h-5 w-5 text-[#006747]" />
-                  <span className="text-lg font-medium text-[#006747]">Parking App</span>
+                  <span className="text-lg font-medium text-[#006747]">USFParkingApp</span>
                 </div>
                 
                 {routes.map((route) => (
