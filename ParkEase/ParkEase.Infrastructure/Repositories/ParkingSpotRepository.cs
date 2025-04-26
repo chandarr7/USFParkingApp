@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,23 +9,69 @@ using ParkEase.Infrastructure.Data;
 
 namespace ParkEase.Infrastructure.Repositories
 {
-    public class ParkingSpotRepository : Repository<ParkingSpot>, IParkingSpotRepository
+    public class ParkingSpotRepository : IParkingSpotRepository
     {
-        public ParkingSpotRepository(ParkEaseDbContext context) : base(context)
+        private readonly AppDbContext _context;
+        private readonly IUniversityParkingService _universityParkingService;
+
+        public ParkingSpotRepository(AppDbContext context, IUniversityParkingService universityParkingService)
         {
+            _context = context;
+            _universityParkingService = universityParkingService;
+        }
+
+        public async Task<IEnumerable<ParkingSpot>> GetAllAsync()
+        {
+            var dbParkingSpots = await _context.ParkingSpots.ToListAsync();
+            var universityParkingSpots = await _universityParkingService.GetParkingSpotsAsync();
+            
+            return dbParkingSpots.Concat(universityParkingSpots);
+        }
+
+        public async Task<ParkingSpot> GetByIdAsync(int id)
+        {
+            return await _context.ParkingSpots.FindAsync(id);
         }
 
         public async Task<IEnumerable<ParkingSpot>> SearchAsync(string location, double radius)
         {
-            // In a real application, this would use a spatial query or call a geocoding service
-            // For this example, we'll just filter by city and sort by distance (if available)
-            var spots = await _dbSet
+            // In a real implementation, would use geolocation calculations
+            // For now, return spots that match the city/location
+            var dbParkingSpots = await _context.ParkingSpots
                 .Where(p => p.City.Contains(location) || p.Address.Contains(location))
                 .ToListAsync();
+                
+            var universityParkingSpots = await _universityParkingService.GetParkingSpotsAsync();
+            var filteredUniversitySpots = universityParkingSpots
+                .Where(p => p.City.Contains(location) || p.Address.Contains(location))
+                .ToList();
+            
+            return dbParkingSpots.Concat(filteredUniversitySpots);
+        }
 
-            // If we have coordinates, we could calculate actual distances
-            // Here we're just using the distance field if it's already populated
-            return spots.OrderBy(p => p.Distance ?? double.MaxValue);
+        public async Task<ParkingSpot> AddAsync(ParkingSpot parkingSpot)
+        {
+            parkingSpot.CreatedAt = DateTime.UtcNow;
+            parkingSpot.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.ParkingSpots.AddAsync(parkingSpot);
+            await _context.SaveChangesAsync();
+            
+            return parkingSpot;
+        }
+
+        public async Task UpdateAsync(ParkingSpot parkingSpot)
+        {
+            parkingSpot.UpdatedAt = DateTime.UtcNow;
+            
+            _context.ParkingSpots.Update(parkingSpot);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(ParkingSpot parkingSpot)
+        {
+            _context.ParkingSpots.Remove(parkingSpot);
+            await _context.SaveChangesAsync();
         }
     }
 }
