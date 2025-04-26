@@ -6,6 +6,7 @@ import type {
   SearchParams,
   EnrichedReservation
 } from "@/types";
+import { getTampaParkingGarages } from "./tampaApi";
 
 // Parking Spots
 export async function fetchParkingSpots(): Promise<ParkingSpot[]> {
@@ -19,8 +20,39 @@ export async function fetchParkingSpot(id: number): Promise<ParkingSpot> {
 }
 
 export async function searchParkingSpots(params: SearchParams): Promise<ParkingSpot[]> {
+  // Get spots from our backend
   const res = await apiRequest("POST", "/api/parking-spots/search", params);
-  return res.json();
+  const localSpots = await res.json();
+  
+  try {
+    // Get spots from Tampa API
+    let tampaSpots: ParkingSpot[] = [];
+    
+    // Only fetch Tampa spots if location contains Tampa or no location specified
+    const isTampaSearch = !params.location || 
+      params.location.toLowerCase().includes('tampa') || 
+      params.location.toLowerCase().includes('fl');
+      
+    if (isTampaSearch) {
+      tampaSpots = await getTampaParkingGarages();
+      
+      // Calculate a simple distance score if location is provided
+      if (params.location && params.location.trim() !== '') {
+        // For demo purposes, just assign random distances
+        tampaSpots = tampaSpots.map(spot => ({
+          ...spot,
+          distance: Math.random() * parseFloat(params.radius)
+        }));
+      }
+    }
+    
+    // Combine both sources
+    return [...localSpots, ...tampaSpots];
+  } catch (error) {
+    console.error("Error fetching Tampa parking data:", error);
+    // If Tampa API fails, just return local data
+    return localSpots;
+  }
 }
 
 // Reservations

@@ -3,8 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ParkingSpotItem from "./ParkingSpotItem";
+import ParkingMap from "./ParkingMap";
 import { ParkingSpot } from "@/types";
-import { Map } from "lucide-react";
+import { Map, AlertCircle } from "lucide-react";
 
 interface MapAndListingSectionProps {
   parkingSpots: ParkingSpot[];
@@ -40,28 +41,43 @@ const MapAndListingSection: React.FC<MapAndListingSectionProps> = ({
         {/* Left Side: Map */}
         <div className="lg:col-span-2">
           <Card className="h-96 lg:h-[32rem] overflow-hidden">
-            <CardContent className="p-0 h-full">
-              <div className="bg-neutral-200 h-full w-full flex items-center justify-center">
-                {selectedSpot ? (
-                  <div className="text-center p-4">
-                    <Map className="h-16 w-16 text-neutral-400 mx-auto" />
-                    <h3 className="text-lg font-medium mt-2">{selectedSpot.name}</h3>
-                    <p className="text-neutral-600">{selectedSpot.address}, {selectedSpot.city}</p>
-                    <p className="text-neutral-600 mt-2">
-                      ${selectedSpot.price.toFixed(2)}/hr • {selectedSpot.available_spots} spots available
-                    </p>
-                    {selectedSpot.distance && (
-                      <p className="text-neutral-600">{selectedSpot.distance} miles away</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center p-4">
-                    <Map className="h-16 w-16 text-neutral-400 mx-auto" />
-                    <p className="mt-2 text-neutral-600">Select a parking location to view details</p>
-                    <p className="text-sm text-neutral-500">Parking locations will be shown as markers</p>
+            <CardHeader className="py-3 px-4">
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg font-medium">Parking Locations Map</CardTitle>
+                {selectedSpot && (
+                  <div className="flex items-center text-sm">
+                    <span className="text-primary font-medium">{selectedSpot.name}</span>
+                    <span className="mx-1">•</span>
+                    <span>${selectedSpot.price.toFixed(2)}/hr</span>
+                    <span className="mx-1">•</span>
+                    <span>{selectedSpot.available_spots} spots</span>
                   </div>
                 )}
               </div>
+            </CardHeader>
+            <CardContent className="p-0 h-[calc(100%-60px)]">
+              {parkingSpots.length > 0 ? (
+                <ParkingMap 
+                  parkingSpots={parkingSpots} 
+                  onSelectSpot={handleParkingSpotSelect} 
+                />
+              ) : (
+                <div className="bg-neutral-200 h-full w-full flex items-center justify-center">
+                  {isLoading ? (
+                    <div className="text-center p-4">
+                      <Skeleton className="h-16 w-16 rounded-full mx-auto" />
+                      <Skeleton className="h-4 w-48 mx-auto mt-4" />
+                      <Skeleton className="h-3 w-36 mx-auto mt-2" />
+                    </div>
+                  ) : (
+                    <div className="text-center p-4">
+                      <AlertCircle className="h-16 w-16 text-neutral-400 mx-auto" />
+                      <p className="mt-2 text-neutral-600">No parking locations found</p>
+                      <p className="text-sm text-neutral-500">Try searching for a different area</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
