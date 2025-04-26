@@ -124,65 +124,7 @@ const Welcome = () => {
         </div>
       </div>
 
-      {/* Meet the Team Section */}
-      <div className="py-20 px-4 bg-gray-50">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-[#006747] mb-16">
-            Meet the Team
-            <div className="mt-2 mx-auto w-24 h-1 bg-[#006747]/30 rounded-full"></div>
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Team Member 1 */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#006747] h-20 flex items-center justify-center">
-                <Database className="h-10 w-10 text-white" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Chandar Rathala</h3>
-                <p className="text-[#006747] font-medium mb-3">Backend Architect</p>
-                <p className="text-gray-600 text-sm">Data Flow & System Design</p>
-              </div>
-            </div>
-            
-            {/* Team Member 2 */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#006747] h-20 flex items-center justify-center">
-                <Layout className="h-10 w-10 text-white" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Jennifer Negron</h3>
-                <p className="text-[#006747] font-medium mb-3">Frontend Developer</p>
-                <p className="text-gray-600 text-sm">Home Page & CRUD Navigation</p>
-              </div>
-            </div>
-            
-            {/* Team Member 3 */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#006747] h-20 flex items-center justify-center">
-                <BarChart className="h-10 w-10 text-white" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Ronia Arabian</h3>
-                <p className="text-[#006747] font-medium mb-3">Data Viz Specialist</p>
-                <p className="text-gray-600 text-sm">Visualizations & Styling</p>
-              </div>
-            </div>
-            
-            {/* Team Member 4 */}
-            <div className="bg-white rounded-xl shadow-md overflow-hidden transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#006747] h-20 flex items-center justify-center">
-                <PenTool className="h-10 w-10 text-white" />
-              </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-gray-800">Subhan Faisal</h3>
-                <p className="text-[#006747] font-medium mb-3">UI/UX Designer</p>
-                <p className="text-gray-600 text-sm">Responsive Layout & Styling</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 };
