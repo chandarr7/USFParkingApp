@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, ParkingMeter } from "lucide-react";
-import usfBullLogo from "@/assets/usf-bull-logo.svg";
+import usfLogo from "@/assets/usf-logo.svg";
 
 const Header = () => {
   const [location] = useLocation();
@@ -31,7 +31,7 @@ const Header = () => {
       </div>
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center space-x-3">
-          <img src={usfBullLogo} alt="USF Bull Logo" className="h-12 w-auto hidden sm:block" />
+          <img src={usfLogo} alt="USF Logo" className="h-10 w-auto hidden sm:block" />
           <ParkingMeter className="h-6 w-6" />
           <Link href="/" className="text-xl font-medium">
             ParkEase
