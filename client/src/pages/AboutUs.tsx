@@ -6,22 +6,28 @@ import { Github } from "lucide-react";
 const AboutUs = () => {
   const teamMembers = [
     {
-      name: "John Smith",
+      name: "Chandar Rathala",
+      role: "Backend Architect",
+      description: "Data Flow & System Design. Responsible for database architecture, API endpoints and backend implementation.",
+      avatar: "CR"
+    },
+    {
+      name: "Jennifer Negron",
       role: "Frontend Developer",
-      description: "Responsible for creating responsive user interfaces and implementing client-side functionality.",
-      avatar: "JS"
+      description: "Home Page & CRUD Navigation. Created responsive user interfaces and implemented client-side functionality.",
+      avatar: "JN"
     },
     {
-      name: "Sarah Johnson",
-      role: "Backend Developer",
-      description: "Built API endpoints and implemented data models for the application.",
-      avatar: "SJ"
+      name: "Ronia Arabian",
+      role: "Data Viz Specialist",
+      description: "Visualizations & Styling. Developed interactive data visualizations and charts for the application.",
+      avatar: "RA"
     },
     {
-      name: "Michael Chen",
+      name: "Subhan Faisal",
       role: "UI/UX Designer",
-      description: "Created the design system and user experience flow for the application.",
-      avatar: "MC"
+      description: "Responsive Layout & Styling. Created the design system and user experience flow for the application.",
+      avatar: "SF"
     },
   ];
 
@@ -51,16 +57,16 @@ const AboutUs = () => {
           <CardTitle className="text-2xl font-medium">Our Team</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {teamMembers.map((member, index) => (
               <div key={index} className="flex flex-col items-center text-center">
                 <Avatar className="h-24 w-24 mb-4">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                  <AvatarFallback className="bg-[#006747] text-white text-xl">
                     {member.avatar}
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-lg font-medium">{member.name}</h3>
-                <p className="text-sm text-neutral-500 mb-2">{member.role}</p>
+                <p className="text-sm text-[#006747] font-medium mb-2">{member.role}</p>
                 <p className="text-sm text-neutral-600">{member.description}</p>
               </div>
             ))}
@@ -86,19 +92,24 @@ const AboutUs = () => {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-medium mb-2">Data Model</h3>
+              <h3 className="text-lg font-medium mb-2">Logical Data Model</h3>
               <p className="mb-4">
-                Our application uses a relational data model with the following key entities:
+                How our entities relate behind the scenes:
               </p>
               <div className="overflow-x-auto">
-                <pre className="bg-neutral-50 p-4 rounded-md border border-neutral-200 text-sm overflow-auto">
-                  {`
-- Users: Stores user account information
-- ParkingSpots: Contains parking location data
-- Reservations: Tracks user reservations with references to users and parking spots
-- Favorites: Stores user's favorite parking spots
-                  `}
-                </pre>
+                <p className="mb-2">
+                  <span className="font-medium text-[#006747]">🔑 PK</span> - Primary Key &nbsp;&nbsp; 
+                  <span className="font-medium text-[#006747]">🔗 FK</span> - Foreign Key &nbsp;&nbsp;
+                  <span className="font-medium text-[#006747]">⚡ Computed Fields</span> &nbsp;&nbsp;
+                  — One ParkingLot ↔ Many ParkingActivity ↔ One User
+                </p>
+                <div className="bg-neutral-50 p-4 rounded-md border border-neutral-200 overflow-auto flex justify-center">
+                  <img 
+                    src="/images/data-model.png"
+                    alt="Logical Data Model" 
+                    className="w-full max-w-3xl"
+                  />
+                </div>
               </div>
             </div>
 
