@@ -49,7 +49,6 @@ export async function searchParkingSpots(params: SearchParams): Promise<ParkingS
     // Combine both sources
     return [...localSpots, ...tampaSpots];
   } catch (error) {
-    console.error("Error fetching Tampa parking data:", error);
     // If Tampa API fails, just return local data
     return localSpots;
   }

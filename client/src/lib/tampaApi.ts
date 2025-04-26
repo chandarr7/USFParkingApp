@@ -78,7 +78,6 @@ export async function getTampaParkingGarages(): Promise<ParkingSpot[]> {
       };
     });
   } catch (error) {
-    console.error('Error fetching Tampa parking data:', error);
     return [];
   }
 }
