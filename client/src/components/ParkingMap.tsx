@@ -43,22 +43,34 @@ const ChangeView = ({ center, zoom }: { center: [number, number]; zoom: number }
 };
 
 const ParkingMap: React.FC<ParkingMapProps> = ({ parkingSpots, onSelectSpot }) => {
-  // Default center will be Tampa, Florida
-  const [mapCenter, setMapCenter] = useState<[number, number]>([27.9506, -82.4572]);
-  const [zoom, setZoom] = useState(13);
+  // Default center will be University of Tampa
+  const [mapCenter, setMapCenter] = useState<[number, number]>([27.9450, -82.4645]);
+  const [zoom, setZoom] = useState(15);
 
-  // Set map center based on spots
+  // Set map center based on spots and focus on University of Tampa locations
   useEffect(() => {
     if (parkingSpots.length > 0) {
-      // Find spot with coordinates
-      const spotsWithCoordinates = parkingSpots.filter(
-        spot => spot.latitude && spot.longitude
+      // First try to find University of Tampa spots
+      const universitySpots = parkingSpots.filter(
+        spot => spot.source === 'university_tampa' && spot.latitude && spot.longitude
       );
       
-      if (spotsWithCoordinates.length > 0) {
-        // Use first spot as center
-        const firstSpot = spotsWithCoordinates[0];
-        setMapCenter([firstSpot.latitude || 27.9506, firstSpot.longitude || -82.4572]);
+      if (universitySpots.length > 0) {
+        // Center on first University spot
+        setMapCenter([universitySpots[0].latitude!, universitySpots[0].longitude!]);
+        setZoom(15); // Closer zoom for university spots
+      } else {
+        // Fall back to any spot with coordinates
+        const spotsWithCoordinates = parkingSpots.filter(
+          spot => spot.latitude && spot.longitude
+        );
+        
+        if (spotsWithCoordinates.length > 0) {
+          // Use first spot as center
+          const firstSpot = spotsWithCoordinates[0];
+          setMapCenter([firstSpot.latitude || 27.9506, firstSpot.longitude || -82.4572]);
+          setZoom(13);
+        }
       }
     }
   }, [parkingSpots]);
@@ -82,11 +94,42 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ parkingSpots, onSelectSpot }) =
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* Highlight University of Tampa area */}
+        {/* Highlight University of Tampa campus */}
         <Circle 
           center={[27.9450, -82.4645]} 
           radius={250}
-          pathOptions={{ fillColor: '#006747', fillOpacity: 0.1, color: '#006747', weight: 1 }}
+          pathOptions={{ fillColor: '#006747', fillOpacity: 0.1, color: '#006747', weight: 2 }}
+        />
+        
+        {/* Add University of Tampa buildings as markers */}
+        <Marker
+          position={[27.9460, -82.4638]}
+          icon={L.divIcon({
+            className: 'bg-transparent',
+            html: `<div class="university-label">Plant Hall</div>`,
+            iconSize: [80, 20],
+            iconAnchor: [40, 0]
+          })}
+        />
+        
+        <Marker
+          position={[27.9437, -82.4630]}
+          icon={L.divIcon({
+            className: 'bg-transparent',
+            html: `<div class="university-label">Vaughn Center</div>`,
+            iconSize: [100, 20],
+            iconAnchor: [50, 0]
+          })}
+        />
+        
+        <Marker
+          position={[27.9470, -82.4655]}
+          icon={L.divIcon({
+            className: 'bg-transparent',
+            html: `<div class="university-label">Athletic Field</div>`,
+            iconSize: [100, 20],
+            iconAnchor: [50, 0]
+          })}
         />
 
         {parkingSpots.map(spot => {
