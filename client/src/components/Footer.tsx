@@ -9,7 +9,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <Car className="h-6 w-6" />
-              <span className="text-xl font-medium">Parking App</span>
+              <span className="text-xl font-medium">USFParkingApp</span>
             </div>
             <p className="text-white/80 text-sm">
               Find and reserve parking spots easily with our comprehensive parking management solution.
@@ -79,9 +79,24 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="mt-10 pt-6 border-t border-white/20 flex flex-col md:flex-row justify-between items-center">
+        {/* Main site navigation in footer */}
+        <div className="mt-10 pt-6 border-t border-white/20 flex justify-center">
+          <div className="flex flex-wrap gap-6 justify-center py-4">
+            <Link href="/home" className="text-white font-medium hover:underline text-lg">
+              Home
+            </Link>
+            <Link href="/visualizations" className="text-white font-medium hover:underline text-lg">
+              Visualizations
+            </Link>
+            <Link href="/about" className="text-white font-medium hover:underline text-lg">
+              About
+            </Link>
+          </div>
+        </div>
+        
+        <div className="pt-4 border-t border-white/20 flex flex-col md:flex-row justify-between items-center">
           <p className="text-white/70 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} Parking Management System. All rights reserved.
+            &copy; {new Date().getFullYear()} USFParkingApp. All rights reserved.
           </p>
           
           <div className="flex space-x-5">
