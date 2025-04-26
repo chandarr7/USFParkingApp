@@ -7,7 +7,7 @@ namespace ParkEase.Core.Models
         public int ParkingSpotId { get; set; }
         
         // Navigation properties
-        public User User { get; set; }
-        public ParkingSpot ParkingSpot { get; set; }
+        public virtual User User { get; set; }
+        public virtual ParkingSpot ParkingSpot { get; set; }
     }
 }
