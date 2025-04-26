@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using ParkEase.Core.Interfaces;
 using ParkEase.Infrastructure.Data;
 using ParkEase.Infrastructure.Repositories;
+using ParkEase.Infrastructure.Services;
+using System;
 
 namespace ParkEase.Infrastructure
 {
@@ -23,6 +25,13 @@ namespace ParkEase.Infrastructure
             services.AddScoped<IParkingSpotRepository, ParkingSpotRepository>();
             services.AddScoped<IReservationRepository, ReservationRepository>();
             services.AddScoped<IFavoriteRepository, FavoriteRepository>();
+
+            // Register HTTP client for external service
+            services.AddHttpClient<IExternalParkingService, TampaParkingService>(client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+                client.DefaultRequestHeaders.Add("User-Agent", "ParkEase-Application");
+            });
 
             return services;
         }
