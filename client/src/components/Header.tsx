@@ -13,10 +13,9 @@ const Header = () => {
   };
   
   const routes = [
-    { path: "/", label: "Home" },
-    { path: "/reservations", label: "My Reservations" },
-    { path: "/favorites", label: "Favorites" },
-    { path: "/about", label: "About Us" }
+    { path: "/home", label: "Home" },
+    { path: "/visualizations", label: "Visualizations" },
+    { path: "/about", label: "About" }
   ];
   
   const isCurrentPath = (path: string) => location === path;
@@ -31,7 +30,7 @@ const Header = () => {
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <Link href="/" className="text-xl font-medium">
-            ParkEase
+            USF Parking App
           </Link>
         </div>
         

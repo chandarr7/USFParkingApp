@@ -9,7 +9,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-4">
               <ParkingMeter className="h-6 w-6" />
-              <span className="text-xl font-medium">ParkEase</span>
+              <span className="text-xl font-medium">USF Parking App</span>
             </div>
             <p className="text-secondary/80 text-sm">
               Find and reserve parking spots easily with our comprehensive parking management solution.
@@ -19,10 +19,10 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-medium mb-4">Quick Links</h4>
             <ul className="space-y-2 text-secondary/80">
-              <li><Link href="/" className="hover:text-secondary transition-colors duration-200">Home</Link></li>
-              <li><Link href="/about" className="hover:text-secondary transition-colors duration-200">About Us</Link></li>
-              <li><Link href="/reservations" className="hover:text-secondary transition-colors duration-200">My Reservations</Link></li>
-              <li><Link href="/favorites" className="hover:text-secondary transition-colors duration-200">Favorites</Link></li>
+              <li><Link href="/" className="hover:text-secondary transition-colors duration-200">Welcome</Link></li>
+              <li><Link href="/home" className="hover:text-secondary transition-colors duration-200">Home</Link></li>
+              <li><Link href="/visualizations" className="hover:text-secondary transition-colors duration-200">Visualizations</Link></li>
+              <li><Link href="/about" className="hover:text-secondary transition-colors duration-200">About</Link></li>
             </ul>
           </div>
           
