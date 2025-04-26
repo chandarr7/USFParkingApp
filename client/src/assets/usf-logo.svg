@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 100" width="350" height="100">
+  <style>
+    .usf-text { fill: #006747; font-family: Arial, sans-serif; font-weight: bold; }
+    .usf-full { fill: #006747; font-family: Arial, sans-serif; font-size: 14px; }
+    .usf-gold { fill: #CFC493; }
+  </style>
+  <rect x="10" y="10" width="330" height="80" rx="10" class="usf-gold" opacity="0.2" />
+  <text x="40" y="60" class="usf-text" font-size="60">USF</text>
+  <text x="40" y="80" class="usf-full" font-size="16">University of South Florida</text>
+</svg>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, MapPin, Calendar } from "lucide-react";
 import { SearchParams } from "@/types";
+import usfLogo from "@/assets/usf-logo.svg";
 
 const searchSchema = z.object({
   location: z.string().min(1, "Location is required"),
@@ -40,7 +41,12 @@ const SearchSection: React.FC<SearchSectionProps> = ({ onSearch }) => {
     <section className="mb-8">
       <Card>
         <CardContent className="pt-6">
-          <h2 className="text-2xl font-medium text-neutral-800 mb-4">Find Parking Near You</h2>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h2 className="text-2xl font-medium text-neutral-800">Find Parking Near You</h2>
+            <div className="mt-4 md:mt-0">
+              <img src={usfLogo} alt="University of South Florida Logo" className="h-16" />
+            </div>
+          </div>
           
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
