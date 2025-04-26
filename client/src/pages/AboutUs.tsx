@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Github } from "lucide-react";
+import { Github, Mail, Phone } from "lucide-react";
 
 const AboutUs = () => {
   const teamMembers = [
@@ -148,6 +148,29 @@ const AboutUs = () => {
                   https://github.com/yourusername/parkease
                 </a>
               </div>
+            </div>
+
+            <Separator />
+
+            <div>
+              <h3 className="text-lg font-medium mb-2">Contact Information</h3>
+              <p className="mb-4">
+                For inquiries, support, or more information about this project, please contact:
+              </p>
+              <ul className="space-y-3">
+                <li className="flex items-start space-x-2">
+                  <Mail className="h-5 w-5 mt-0.5 text-[#006747]" />
+                  <span>
+                    <a href="mailto:chandarrathala@usf.edu" className="text-primary hover:underline">chandarrathala@usf.edu</a>
+                  </span>
+                </li>
+                <li className="flex items-start space-x-2">
+                  <Phone className="h-5 w-5 mt-0.5 text-[#006747]" />
+                  <span>
+                    <a href="tel:+18134189804" className="text-primary hover:underline">+1 (813) 418-9804</a>
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
         </CardContent>
