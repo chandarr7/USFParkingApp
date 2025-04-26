@@ -5,6 +5,25 @@ import { LineChart, BarChart3, MapPin, ChevronRight, Clock, Calendar, Car, Datab
 const Welcome = () => {
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Welcome Page Header with Navigation */}
+      <div className="bg-white py-8 shadow-md">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-col items-center justify-center text-center space-y-8">
+            <div className="flex items-center">
+              <Car className="h-8 w-8 text-[#006747] mr-3" />
+              <h1 className="text-4xl font-bold text-[#006747]">USFParkingApp</h1>
+            </div>
+            
+            <div className="flex flex-wrap justify-center gap-10 text-lg font-medium border-t border-b border-gray-200 py-4 w-full max-w-2xl">
+              <Link href="/" className="text-[#006747] border-b-2 border-[#006747] py-2 px-3 transform hover:scale-105 transition-all">Welcome</Link>
+              <Link href="/home" className="text-gray-600 hover:text-[#006747] hover:border-b-2 hover:border-[#006747] py-2 px-3 transition-all">Home</Link>
+              <Link href="/visualizations" className="text-gray-600 hover:text-[#006747] hover:border-b-2 hover:border-[#006747] py-2 px-3 transition-all">Visualizations</Link>
+              <Link href="/about" className="text-gray-600 hover:text-[#006747] hover:border-b-2 hover:border-[#006747] py-2 px-3 transition-all">About</Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       {/* Hero Section with background image */}
       <div className="relative flex flex-col items-center justify-center text-center py-28 px-4 bg-[#006747] text-white overflow-hidden">
         <div className="absolute inset-0 bg-black opacity-40 z-10"></div>
