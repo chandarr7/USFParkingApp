@@ -9,18 +9,9 @@ namespace ParkEase.Core.Models
         public string Username { get; set; }
         public string Name { get; set; }
         public string Email { get; set; }
-        public string PasswordHash { get; set; }
-        public DateTime CreatedAt { get; set; }
         
         // Navigation properties
         public virtual ICollection<Reservation> Reservations { get; set; }
         public virtual ICollection<Favorite> Favorites { get; set; }
-        
-        public User()
-        {
-            Reservations = new List<Reservation>();
-            Favorites = new List<Favorite>();
-            CreatedAt = DateTime.UtcNow;
-        }
     }
 }

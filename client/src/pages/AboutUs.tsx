@@ -134,8 +134,9 @@ const AboutUs = () => {
               <h3 className="text-lg font-medium mb-2">Technical Stack</h3>
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>Frontend:</strong> React, TypeScript, Tailwind CSS, Shadcn UI</li>
-                <li><strong>Backend:</strong> Express.js, Node.js</li>
-                <li><strong>Data Storage:</strong> In-memory storage with persistence</li>
+                <li><strong>Backend:</strong> ASP.NET Core (C#)</li>
+                <li><strong>Data Storage:</strong> Entity Framework Core with SQL Server</li>
+                <li><strong>Architecture:</strong> MVC Pattern with Repository Design Pattern</li>
                 <li><strong>Deployment:</strong> Azure Web App Service</li>
               </ul>
             </div>

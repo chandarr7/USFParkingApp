@@ -1,3 +1,5 @@
+using System;
+
 namespace ParkEase.Core.Models
 {
     public class Favorite
