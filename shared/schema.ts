@@ -1,7 +1,9 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, varchar, doublePrecision, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
+// Table definitions
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -27,8 +29,8 @@ export const parkingSpots = pgTable("parking_spots", {
 
 export const reservations = pgTable("reservations", {
   id: serial("id").primaryKey(),
-  user_id: integer("user_id").notNull(),
-  parking_spot_id: integer("parking_spot_id").notNull(),
+  user_id: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  parking_spot_id: integer("parking_spot_id").notNull().references(() => parkingSpots.id, { onDelete: 'cascade' }),
   date: timestamp("date").notNull(),
   start_time: text("start_time").notNull(),
   duration: integer("duration").notNull(),
@@ -41,9 +43,42 @@ export const reservations = pgTable("reservations", {
 
 export const favorites = pgTable("favorites", {
   id: serial("id").primaryKey(),
-  user_id: integer("user_id").notNull(),
-  parking_spot_id: integer("parking_spot_id").notNull(),
+  user_id: integer("user_id").notNull().references(() => users.id, { onDelete: 'cascade' }),
+  parking_spot_id: integer("parking_spot_id").notNull().references(() => parkingSpots.id, { onDelete: 'cascade' }),
 });
+
+// Relations definitions
+export const usersRelations = relations(users, ({ many }) => ({
+  reservations: many(reservations),
+  favorites: many(favorites),
+}));
+
+export const parkingSpotsRelations = relations(parkingSpots, ({ many }) => ({
+  reservations: many(reservations),
+  favorites: many(favorites),
+}));
+
+export const reservationsRelations = relations(reservations, ({ one }) => ({
+  user: one(users, {
+    fields: [reservations.user_id],
+    references: [users.id],
+  }),
+  parkingSpot: one(parkingSpots, {
+    fields: [reservations.parking_spot_id],
+    references: [parkingSpots.id],
+  }),
+}));
+
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+  user: one(users, {
+    fields: [favorites.user_id],
+    references: [users.id],
+  }),
+  parkingSpot: one(parkingSpots, {
+    fields: [favorites.parking_spot_id],
+    references: [parkingSpots.id],
+  }),
+}));
 
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true });

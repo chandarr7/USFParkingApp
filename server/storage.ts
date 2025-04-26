@@ -1,3 +1,5 @@
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 import { 
   users, 
   type User, 
@@ -41,175 +43,200 @@ export interface IStorage {
   isFavorite(userId: number, parkingSpotId: number): Promise<boolean>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private parkingSpots: Map<number, ParkingSpot>;
-  private reservations: Map<number, Reservation>;
-  private favorites: Map<number, Favorite>;
-  
-  private userCurrentId: number;
-  private parkingSpotCurrentId: number;
-  private reservationCurrentId: number;
-  private favoriteCurrentId: number;
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
 
-  constructor() {
-    this.users = new Map();
-    this.parkingSpots = new Map();
-    this.reservations = new Map();
-    this.favorites = new Map();
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  // Parking spot operations
+  async getParkingSpots(): Promise<ParkingSpot[]> {
+    return await db.select().from(parkingSpots);
+  }
+
+  async getParkingSpot(id: number): Promise<ParkingSpot | undefined> {
+    const [spot] = await db.select().from(parkingSpots).where(eq(parkingSpots.id, id));
+    return spot || undefined;
+  }
+
+  async createParkingSpot(insertParkingSpot: InsertParkingSpot): Promise<ParkingSpot> {
+    const [spot] = await db.insert(parkingSpots).values(insertParkingSpot).returning();
+    return spot;
+  }
+
+  async updateParkingSpot(id: number, parkingSpotUpdate: Partial<InsertParkingSpot>): Promise<ParkingSpot | undefined> {
+    const [updatedSpot] = await db
+      .update(parkingSpots)
+      .set(parkingSpotUpdate)
+      .where(eq(parkingSpots.id, id))
+      .returning();
+    return updatedSpot || undefined;
+  }
+
+  async deleteParkingSpot(id: number): Promise<boolean> {
+    const [deletedSpot] = await db
+      .delete(parkingSpots)
+      .where(eq(parkingSpots.id, id))
+      .returning({ id: parkingSpots.id });
+    return !!deletedSpot;
+  }
+
+  // Reservation operations
+  async getReservations(userId?: number): Promise<Reservation[]> {
+    if (userId) {
+      return await db.select().from(reservations).where(eq(reservations.user_id, userId));
+    }
+    return await db.select().from(reservations);
+  }
+
+  async getReservation(id: number): Promise<Reservation | undefined> {
+    const [reservation] = await db.select().from(reservations).where(eq(reservations.id, id));
+    return reservation || undefined;
+  }
+
+  async createReservation(insertReservation: InsertReservation): Promise<Reservation> {
+    const [reservation] = await db.insert(reservations).values(insertReservation).returning();
+    return reservation;
+  }
+
+  async updateReservation(id: number, reservationUpdate: Partial<InsertReservation>): Promise<Reservation | undefined> {
+    const [updatedReservation] = await db
+      .update(reservations)
+      .set(reservationUpdate)
+      .where(eq(reservations.id, id))
+      .returning();
+    return updatedReservation || undefined;
+  }
+
+  async deleteReservation(id: number): Promise<boolean> {
+    const [deletedReservation] = await db
+      .delete(reservations)
+      .where(eq(reservations.id, id))
+      .returning({ id: reservations.id });
+    return !!deletedReservation;
+  }
+
+  // Favorite operations
+  async getFavorites(userId: number): Promise<Favorite[]> {
+    return await db.select().from(favorites).where(eq(favorites.user_id, userId));
+  }
+
+  async getFavoritesByUser(userId: number): Promise<ParkingSpot[]> {
+    const userFavorites = await db
+      .select({
+        parkingSpot: parkingSpots
+      })
+      .from(favorites)
+      .innerJoin(
+        parkingSpots,
+        eq(favorites.parking_spot_id, parkingSpots.id)
+      )
+      .where(eq(favorites.user_id, userId));
     
-    this.userCurrentId = 1;
-    this.parkingSpotCurrentId = 1;
-    this.reservationCurrentId = 1;
-    this.favoriteCurrentId = 1;
+    return userFavorites.map(row => row.parkingSpot);
+  }
+
+  async createFavorite(insertFavorite: InsertFavorite): Promise<Favorite> {
+    // Check if favorite already exists
+    const [existingFavorite] = await db
+      .select()
+      .from(favorites)
+      .where(
+        and(
+          eq(favorites.user_id, insertFavorite.user_id),
+          eq(favorites.parking_spot_id, insertFavorite.parking_spot_id)
+        )
+      );
     
-    // Add a default user for testing
-    this.createUser({
+    if (existingFavorite) {
+      return existingFavorite;
+    }
+    
+    const [favorite] = await db.insert(favorites).values(insertFavorite).returning();
+    return favorite;
+  }
+
+  async deleteFavorite(id: number): Promise<boolean> {
+    const [deletedFavorite] = await db
+      .delete(favorites)
+      .where(eq(favorites.id, id))
+      .returning({ id: favorites.id });
+    return !!deletedFavorite;
+  }
+  
+  async isFavorite(userId: number, parkingSpotId: number): Promise<boolean> {
+    const [favorite] = await db
+      .select()
+      .from(favorites)
+      .where(
+        and(
+          eq(favorites.user_id, userId),
+          eq(favorites.parking_spot_id, parkingSpotId)
+        )
+      );
+    return !!favorite;
+  }
+}
+
+// Initialize the database with default data
+async function initializeDatabase() {
+  // Check if we have any users
+  const existingUsers = await db.select().from(users);
+  
+  if (existingUsers.length === 0) {
+    // Add default user
+    await db.insert(users).values({
       username: "john.doe",
       password: "password123",
       name: "John Doe",
       email: "john.doe@example.com"
     });
     
-    // Add some initial parking spots
-    this.createParkingSpot({
-      name: "Downtown Parking Garage",
-      address: "123 Main Street",
-      city: "City Center",
-      price: 8.50,
-      available_spots: 45,
-      distance: 0.3,
-      rating: 4.5,
-      latitude: 40.7128,
-      longitude: -74.0060,
-      source: "local",
-      external_id: null
-    });
-    
-    this.createParkingSpot({
-      name: "City Center Lot",
-      address: "456 Park Avenue",
-      city: "Downtown",
-      price: 5.00,
-      available_spots: 12,
-      distance: 0.5,
-      rating: 4.2,
-      latitude: 40.7142,
-      longitude: -74.0064,
-      source: "local",
-      external_id: null
-    });
-  }
-
-  // User operations
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
-  }
-  
-  // Parking spot operations
-  async getParkingSpots(): Promise<ParkingSpot[]> {
-    return Array.from(this.parkingSpots.values());
-  }
-  
-  async getParkingSpot(id: number): Promise<ParkingSpot | undefined> {
-    return this.parkingSpots.get(id);
-  }
-  
-  async createParkingSpot(insertParkingSpot: InsertParkingSpot): Promise<ParkingSpot> {
-    const id = this.parkingSpotCurrentId++;
-    const parkingSpot: ParkingSpot = { ...insertParkingSpot, id };
-    this.parkingSpots.set(id, parkingSpot);
-    return parkingSpot;
-  }
-  
-  async updateParkingSpot(id: number, parkingSpotUpdate: Partial<InsertParkingSpot>): Promise<ParkingSpot | undefined> {
-    const parkingSpot = this.parkingSpots.get(id);
-    if (!parkingSpot) return undefined;
-    
-    const updatedParkingSpot = { ...parkingSpot, ...parkingSpotUpdate };
-    this.parkingSpots.set(id, updatedParkingSpot);
-    return updatedParkingSpot;
-  }
-  
-  async deleteParkingSpot(id: number): Promise<boolean> {
-    return this.parkingSpots.delete(id);
-  }
-  
-  // Reservation operations
-  async getReservations(userId?: number): Promise<Reservation[]> {
-    const allReservations = Array.from(this.reservations.values());
-    if (userId) {
-      return allReservations.filter(reservation => reservation.user_id === userId);
-    }
-    return allReservations;
-  }
-  
-  async getReservation(id: number): Promise<Reservation | undefined> {
-    return this.reservations.get(id);
-  }
-  
-  async createReservation(insertReservation: InsertReservation): Promise<Reservation> {
-    const id = this.reservationCurrentId++;
-    const created_at = new Date();
-    const reservation: Reservation = { ...insertReservation, id, created_at };
-    this.reservations.set(id, reservation);
-    return reservation;
-  }
-  
-  async updateReservation(id: number, reservationUpdate: Partial<InsertReservation>): Promise<Reservation | undefined> {
-    const reservation = this.reservations.get(id);
-    if (!reservation) return undefined;
-    
-    const updatedReservation = { ...reservation, ...reservationUpdate };
-    this.reservations.set(id, updatedReservation);
-    return updatedReservation;
-  }
-  
-  async deleteReservation(id: number): Promise<boolean> {
-    return this.reservations.delete(id);
-  }
-  
-  // Favorite operations
-  async getFavorites(userId: number): Promise<Favorite[]> {
-    return Array.from(this.favorites.values())
-      .filter(favorite => favorite.user_id === userId);
-  }
-  
-  async getFavoritesByUser(userId: number): Promise<ParkingSpot[]> {
-    const userFavorites = await this.getFavorites(userId);
-    return userFavorites
-      .map(favorite => this.parkingSpots.get(favorite.parking_spot_id))
-      .filter((spot): spot is ParkingSpot => spot !== undefined);
-  }
-  
-  async createFavorite(insertFavorite: InsertFavorite): Promise<Favorite> {
-    const id = this.favoriteCurrentId++;
-    const favorite: Favorite = { ...insertFavorite, id };
-    this.favorites.set(id, favorite);
-    return favorite;
-  }
-  
-  async deleteFavorite(id: number): Promise<boolean> {
-    return this.favorites.delete(id);
-  }
-  
-  async isFavorite(userId: number, parkingSpotId: number): Promise<boolean> {
-    return Array.from(this.favorites.values())
-      .some(favorite => favorite.user_id === userId && favorite.parking_spot_id === parkingSpotId);
+    // Add default parking spots
+    await db.insert(parkingSpots).values([
+      {
+        name: "Downtown Parking Garage",
+        address: "123 Main Street",
+        city: "City Center",
+        price: 8.50,
+        available_spots: 45,
+        distance: 0.3,
+        rating: 4.5,
+        latitude: 40.7128,
+        longitude: -74.0060,
+        source: "local",
+        external_id: null
+      },
+      {
+        name: "City Center Lot",
+        address: "456 Park Avenue",
+        city: "Downtown",
+        price: 5.00,
+        available_spots: 12,
+        distance: 0.5,
+        rating: 4.2,
+        latitude: 40.7142,
+        longitude: -74.0064,
+        source: "local",
+        external_id: null
+      }
+    ]);
   }
 }
 
-export const storage = new MemStorage();
+// Create database instance
+export const storage = new DatabaseStorage();
+
+// Initialize the database
+initializeDatabase().catch(console.error);
