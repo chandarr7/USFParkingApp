@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, ParkingMeter } from "lucide-react";
+import usfLogo from "@/assets/usf-logo.svg";
 
 const Header = () => {
   const [location] = useLocation();
@@ -23,8 +24,14 @@ const Header = () => {
   
   return (
     <header className="bg-primary text-white shadow-md">
+      <div className="bg-secondary py-1">
+        <div className="container mx-auto px-4 flex justify-end">
+          <span className="text-xs font-medium text-primary">University of South Florida - Parking Management System</span>
+        </div>
+      </div>
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
+          <img src={usfLogo} alt="USF Logo" className="h-8 w-auto hidden sm:block" />
           <ParkingMeter className="h-6 w-6" />
           <Link href="/" className="text-xl font-medium">
             ParkEase
