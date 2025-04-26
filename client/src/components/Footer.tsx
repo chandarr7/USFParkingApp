@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { ParkingMeter, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-import usfLogo from "@/assets/usf-logo.svg";
+import usfBullLogo from "@/assets/usf-bull-logo.svg";
 
 const Footer = () => {
   return (
@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <img src={usfLogo} alt="USF Logo" className="h-12 w-auto" />
+              <img src={usfBullLogo} alt="USF Bull Logo" className="h-16 w-auto" />
             </div>
             <div className="flex items-center space-x-2 mb-4">
               <ParkingMeter className="h-6 w-6" />
