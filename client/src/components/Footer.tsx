@@ -57,7 +57,7 @@ const Footer = () => {
         
         <div className="mt-8 pt-6 border-t border-secondary/30 flex flex-col md:flex-row justify-between items-center">
           <p className="text-secondary/80 text-sm mb-4 md:mb-0">
-            &copy; {new Date().getFullYear()} University of South Florida. All rights reserved.
+            &copy; {new Date().getFullYear()} Parking Management System. All rights reserved.
           </p>
           
           <div className="flex space-x-4">

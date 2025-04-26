@@ -24,7 +24,7 @@ const Header = () => {
     <header className="bg-primary text-white shadow-md">
       <div className="bg-secondary py-1">
         <div className="container mx-auto px-4 flex justify-end">
-          <span className="text-xs font-medium text-primary">University of South Florida - Parking Management System</span>
+          <span className="text-xs font-medium text-primary">Parking Management System</span>
         </div>
       </div>
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
