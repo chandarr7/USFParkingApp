@@ -45,33 +45,33 @@ const Welcome = () => {
       <div className="py-20 px-4 bg-white">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center text-[#006747] mb-16">
-            Key Features
+            🚗 Key Features (Planned)
             <div className="mt-2 mx-auto w-24 h-1 bg-[#006747]/30 rounded-full"></div>
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="bg-white rounded-xl shadow-lg p-8 transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#D9F2EA] p-4 rounded-full inline-flex mb-6">
-                <BarChart3 className="h-8 w-8 text-[#006747]" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Live Parking Updates</h3>
+              <div className="text-3xl mb-4">📶</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Live updates on parking availability</h3>
               <p className="text-gray-600">Real-time information about available parking spots in each lot across campus.</p>
             </div>
             
             <div className="bg-white rounded-xl shadow-lg p-8 transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#D9F2EA] p-4 rounded-full inline-flex mb-6">
-                <MapPin className="h-8 w-8 text-[#006747]" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Parking Zone Mapping</h3>
+              <div className="text-3xl mb-4">📍</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Parking lot zones and names</h3>
               <p className="text-gray-600">Clear identification of different parking areas with interactive map visualization.</p>
             </div>
             
             <div className="bg-white rounded-xl shadow-lg p-8 transition-transform duration-300 hover:-translate-y-2">
-              <div className="bg-[#D9F2EA] p-4 rounded-full inline-flex mb-6">
-                <LineChart className="h-8 w-8 text-[#006747]" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">Trend Analysis</h3>
+              <div className="text-3xl mb-4">📊</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Data visualization for parking trends</h3>
               <p className="text-gray-600">Advanced analytics to help understand peak hours and plan parking accordingly.</p>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-lg p-8 transition-transform duration-300 hover:-translate-y-2">
+              <div className="text-3xl mb-4">🛠️</div>
+              <h3 className="text-xl font-semibold text-gray-800 mb-3">Admin dashboard for managing lot info</h3>
+              <p className="text-gray-600">Administrative tools to update parking spot availability and manage lot information.</p>
             </div>
           </div>
           
