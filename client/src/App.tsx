@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Layout from "@/components/Layout";
 import Home from "@/pages/Home";
 import Welcome from "@/pages/Welcome";
+import Visualizations from "@/pages/Visualizations";
 import MyReservations from "@/pages/MyReservations";
 import Favorites from "@/pages/Favorites";
 import AboutUs from "@/pages/AboutUs";
@@ -22,7 +23,7 @@ function Router() {
       </Route>
       <Route path="/visualizations">
         <Layout>
-          <Home />
+          <Visualizations />
         </Layout>
       </Route>
       <Route path="/reservations">
