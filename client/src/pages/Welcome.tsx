@@ -36,7 +36,7 @@ const Welcome = () => {
           <div className="animate-fadeIn">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-md">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-white/80">
-                Parking Monitor
+                USFParkingApp
               </span>
             </h1>
             <p className="text-xl mb-10 leading-relaxed max-w-3xl mx-auto text-white/90">
