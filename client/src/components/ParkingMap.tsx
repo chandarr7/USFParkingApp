@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ParkingSpot } from '@/types';
 import L from 'leaflet';
@@ -14,6 +14,15 @@ let DefaultIcon = L.icon({
   shadowUrl: iconShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
+});
+
+// Define a special icon for University of Tampa locations
+let UniversityIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  className: 'university-marker', // This will be styled with CSS
 });
 
 // Set the default icon for all markers
@@ -73,13 +82,25 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ parkingSpots, onSelectSpot }) =
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
+        {/* Highlight University of Tampa area */}
+        <Circle 
+          center={[27.9450, -82.4645]} 
+          radius={250}
+          pathOptions={{ fillColor: '#006747', fillOpacity: 0.1, color: '#006747', weight: 1 }}
+        />
+
         {parkingSpots.map(spot => {
           if (!spot.latitude || !spot.longitude) return null;
+          
+          // Determine if this is a University of Tampa location
+          const isUniversity = spot.source === 'university_tampa';
+          const markerIcon = isUniversity ? UniversityIcon : DefaultIcon;
           
           return (
             <Marker
               key={`${spot.source}-${spot.id}`}
               position={[spot.latitude, spot.longitude]}
+              icon={markerIcon}
               eventHandlers={{
                 click: () => handleMarkerClick(spot),
               }}
@@ -87,6 +108,11 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ parkingSpots, onSelectSpot }) =
               <Popup>
                 <div>
                   <h3 className="font-medium">{spot.name}</h3>
+                  {isUniversity && (
+                    <span className="inline-block bg-[#006747] text-white text-xs px-2 py-0.5 rounded mb-1">
+                      University of Tampa
+                    </span>
+                  )}
                   <p className="text-sm">{spot.address}</p>
                   <p className="text-sm">
                     <strong>Price:</strong> ${spot.price.toFixed(2)}
@@ -94,6 +120,11 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ parkingSpots, onSelectSpot }) =
                   <p className="text-sm">
                     <strong>Available spots:</strong> {spot.available_spots}
                   </p>
+                  {spot.rating && (
+                    <p className="text-sm">
+                      <strong>Rating:</strong> {spot.rating.toFixed(1)}/5.0
+                    </p>
+                  )}
                   {onSelectSpot && (
                     <button
                       className="mt-2 text-xs bg-primary text-white px-2 py-1 rounded"
