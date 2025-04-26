@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, User, Car } from "lucide-react";
 
 const Header = () => {
   const [location] = useLocation();
@@ -21,20 +21,21 @@ const Header = () => {
   const isCurrentPath = (path: string) => location === path;
   
   return (
-    <header className="bg-primary text-white shadow-md">
-      <div className="bg-secondary py-1">
+    <header className="bg-[#006747] text-white shadow-md">
+      <div className="bg-[#D9F2EA] py-1">
         <div className="container mx-auto px-4 flex justify-end">
-          <span className="text-xs font-medium text-primary">Parking Management System</span>
+          <span className="text-xs font-medium text-[#006747]">Parking Management System</span>
         </div>
       </div>
-      <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
+      <nav className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-3">
+          <Car className="h-6 w-6 text-white" />
           <Link href="/" className="text-xl font-medium">
-            USF Parking App
+            Parking App
           </Link>
         </div>
         
-        <div className="hidden md:flex space-x-6">
+        <div className="hidden md:flex space-x-8">
           {routes.map((route) => (
             <Link 
               key={route.path} 
@@ -53,20 +54,25 @@ const Header = () => {
         <div className="flex items-center space-x-4">
           <Button 
             variant="ghost" 
-            className="hidden md:flex items-center space-x-1 bg-white/10 hover:bg-white/20 text-white"
+            className="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white rounded-full"
           >
-            <span className="text-sm">Account</span>
-            <span className="ml-1">{user.name}</span>
+            <User className="h-4 w-4" />
+            <span className="text-sm">{user.name}</span>
           </Button>
           
           <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="rounded-full">
                 <Menu className="h-6 w-6 text-white" />
               </Button>
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col space-y-4 mt-6">
+                <div className="flex items-center space-x-2 mb-6">
+                  <Car className="h-5 w-5 text-[#006747]" />
+                  <span className="text-lg font-medium text-[#006747]">Parking App</span>
+                </div>
+                
                 {routes.map((route) => (
                   <Link 
                     key={route.path} 
@@ -74,15 +80,16 @@ const Header = () => {
                     onClick={() => setIsMenuOpen(false)}
                     className={`py-2 text-lg ${
                       isCurrentPath(route.path) 
-                        ? "text-primary font-medium" 
-                        : "text-gray-600"
+                        ? "text-[#006747] font-medium" 
+                        : "text-gray-600 hover:text-[#006747]"
                     }`}
                   >
                     {route.label}
                   </Link>
                 ))}
-                <hr className="my-2" />
-                <div className="flex items-center">
+                <hr className="my-4" />
+                <div className="flex items-center space-x-2">
+                  <User className="h-4 w-4 text-[#006747]" />
                   <div className="font-medium">{user.name}</div>
                 </div>
               </div>
