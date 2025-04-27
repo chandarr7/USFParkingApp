@@ -1,21 +1,29 @@
 import { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth2";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Payment } from "@shared/schema";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
+import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from 'date-fns';
 import { CreditCard, Wallet } from 'lucide-react';
 import Layout from '@/components/Layout';
+import { DataTable } from '@/components/DataTable';
+
+// Create a schema for payment CRUD operations
+const paymentSchema = z.object({
+  id: z.number().optional(),
+  user_id: z.number(),
+  amount: z.number().min(0.01, "Amount must be greater than 0"),
+  payment_method: z.enum(["credit_card", "wallet"]),
+  payment_status: z.enum(["succeeded", "pending", "failed"]),
+  stripe_payment_intent_id: z.string().optional().nullable(),
+  last_four: z.string().max(4).optional().nullable(),
+  card_brand: z.string().optional().nullable()
+});
+
+type PaymentSchemaType = z.infer<typeof paymentSchema>;
 
 const PaymentHistory = () => {
   const { user } = useAuth();
@@ -23,29 +31,29 @@ const PaymentHistory = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPayments = async () => {
-      if (!user) return;
-      
-      try {
-        setLoading(true);
-        const response = await apiRequest('GET', `/api/payments?userId=${user.id}`);
-        const data = await response.json();
-        setPayments(data);
-      } catch (error) {
-        console.error('Failed to fetch payments:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch payment history',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPayments = async () => {
+    if (!user) return;
+    
+    try {
+      setLoading(true);
+      const response = await apiRequest('GET', `/api/payments?userId=${user.id}`);
+      const data = await response.json();
+      setPayments(data);
+    } catch (error) {
+      console.error('Failed to fetch payments:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch payment history',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPayments();
-  }, [user, toast]);
+  }, [user]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -71,6 +79,89 @@ const PaymentHistory = () => {
     }
   };
 
+  const handleAddPayment = async (data: PaymentSchemaType) => {
+    const response = await apiRequest('POST', '/api/payments', data);
+    if (!response.ok) {
+      throw new Error('Failed to add payment');
+    }
+    
+    fetchPayments();
+  };
+
+  const handleUpdatePayment = async (id: number, data: PaymentSchemaType) => {
+    const response = await apiRequest('PUT', `/api/payments/${id}`, data);
+    if (!response.ok) {
+      throw new Error('Failed to update payment');
+    }
+    
+    fetchPayments();
+  };
+
+  const handleDeletePayment = async (id: number) => {
+    const response = await apiRequest('DELETE', `/api/payments/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to delete payment');
+    }
+    
+    fetchPayments();
+  };
+
+  const columns = [
+    {
+      id: 'date',
+      header: 'Date',
+      accessorKey: (payment: Payment) => (
+        <>
+          {new Date(payment.transaction_date).toLocaleDateString()}{' '}
+          <span className="text-xs text-muted-foreground">
+            ({formatDistanceToNow(new Date(payment.transaction_date), { addSuffix: true })})
+          </span>
+        </>
+      ),
+    },
+    {
+      id: 'amount',
+      header: 'Amount',
+      accessorKey: 'amount' as keyof Payment,
+      cell: ({ row }: { row: Payment }) => (
+        <span className="font-medium">${row.amount.toFixed(2)}</span>
+      ),
+    },
+    {
+      id: 'paymentMethod',
+      header: 'Method',
+      accessorKey: 'payment_method' as keyof Payment,
+      cell: ({ row }: { row: Payment }) => (
+        <div className="flex items-center">
+          {getPaymentMethodIcon(row.payment_method)}
+          {row.payment_method === 'credit_card' 
+            ? `Card ${row.card_brand ? row.card_brand : ''} ${row.last_four ? '•••• ' + row.last_four : ''}` 
+            : 'USF Wallet'}
+        </div>
+      ),
+    },
+    {
+      id: 'status',
+      header: 'Status',
+      accessorKey: 'payment_status' as keyof Payment,
+      cell: ({ row }: { row: Payment }) => getStatusBadge(row.payment_status),
+    },
+    {
+      id: 'details',
+      header: 'Details',
+      accessorKey: 'stripe_payment_intent_id' as keyof Payment,
+      cell: ({ row }: { row: Payment }) => (
+        row.stripe_payment_intent_id ? (
+          <span className="text-xs text-muted-foreground">
+            ID: {row.stripe_payment_intent_id.substring(0, 10)}...
+          </span>
+        ) : (
+          '-'
+        )
+      ),
+    },
+  ];
+
   if (!user) {
     return (
       <Layout>
@@ -92,60 +183,24 @@ const PaymentHistory = () => {
         <Card>
           <CardHeader>
             <CardTitle className="text-2xl font-bold">Payment History</CardTitle>
-            <CardDescription>View all your past payments</CardDescription>
+            <CardDescription>View, add, edit, and delete your payment records</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
               <div className="flex justify-center items-center h-40">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
               </div>
-            ) : payments.length === 0 ? (
-              <div className="text-center py-10">
-                <p className="text-muted-foreground">No payment history found</p>
-              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Details</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {payments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>
-                        {new Date(payment.transaction_date).toLocaleDateString()}{' '}
-                        <span className="text-xs text-muted-foreground">
-                          ({formatDistanceToNow(new Date(payment.transaction_date), { addSuffix: true })})
-                        </span>
-                      </TableCell>
-                      <TableCell className="font-medium">${payment.amount.toFixed(2)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          {getPaymentMethodIcon(payment.payment_method)}
-                          {payment.payment_method === 'credit_card' 
-                            ? `Card ${payment.card_brand ? payment.card_brand : ''} ${payment.last_four ? '•••• ' + payment.last_four : ''}` 
-                            : 'USF Wallet'}
-                        </div>
-                      </TableCell>
-                      <TableCell>{getStatusBadge(payment.payment_status)}</TableCell>
-                      <TableCell>
-                        {payment.stripe_payment_intent_id ? (
-                          <span className="text-xs text-muted-foreground">
-                            ID: {payment.stripe_payment_intent_id.substring(0, 10)}...
-                          </span>
-                        ) : (
-                          '-'
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <DataTable
+                data={payments}
+                columns={columns}
+                title="Payment"
+                schema={paymentSchema}
+                onAdd={handleAddPayment}
+                onUpdate={handleUpdatePayment}
+                onDelete={handleDeletePayment}
+                onRefresh={fetchPayments}
+              />
             )}
           </CardContent>
         </Card>

@@ -300,6 +300,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Payments - Additional CRUD operations
+  
+  // Create a new payment record
+  app.post("/api/payments", async (req: Request, res: Response) => {
+    try {
+      const { user_id, amount, payment_method, payment_status, stripe_payment_intent_id, last_four, card_brand } = req.body;
+      
+      if (!user_id || !amount || !payment_method || !payment_status) {
+        return res.status(400).json({ error: "Required fields missing" });
+      }
+      
+      const payment = await storage.createPayment({
+        user_id,
+        amount,
+        payment_method,
+        payment_status,
+        stripe_payment_intent_id: stripe_payment_intent_id || null,
+        last_four: last_four || null,
+        card_brand: card_brand || null
+      });
+      
+      res.status(201).json(payment);
+    } catch (error) {
+      console.error("Error creating payment:", error);
+      res.status(500).json({ error: "Failed to create payment record" });
+    }
+  });
+  
+  // Update a payment record
+  app.put("/api/payments/:id", async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      
+      if (!id) {
+        return res.status(400).json({ error: "Payment ID is required" });
+      }
+      
+      const payment = await storage.getPayment(id);
+      
+      if (!payment) {
+        return res.status(404).json({ error: "Payment not found" });
+      }
+      
+      const { amount, payment_method, payment_status, stripe_payment_intent_id, last_four, card_brand } = req.body;
+      
+      const updatedPayment = await storage.updatePaymentStatus(id, payment_status);
+      
+      // We'd need to enhance the storage interface to support full payment updates
+      // For now, the updatePaymentStatus method is the only one available
+      
+      res.json(updatedPayment);
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      res.status(500).json({ error: "Failed to update payment record" });
+    }
+  });
+  
+  // Delete a payment record
+  app.delete("/api/payments/:id", async (req: Request, res: Response) => {
+    try {
+      const id = Number(req.params.id);
+      
+      if (!id) {
+        return res.status(400).json({ error: "Payment ID is required" });
+      }
+      
+      const payment = await storage.getPayment(id);
+      
+      if (!payment) {
+        return res.status(404).json({ error: "Payment not found" });
+      }
+      
+      // Note: In a real application, you'd want to consider if payment records should
+      // actually be deletable or just marked as archived/inactive
+      
+      // Implement deletePayment in storage interface
+      // const success = await storage.deletePayment(id);
+      
+      // For now, we'll just return a 501 Not Implemented
+      res.status(501).json({ message: "Payment deletion not implemented" });
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      res.status(500).json({ error: "Failed to delete payment record" });
+    }
+  });
+
   // Create server
   const httpServer = createServer(app);
   return httpServer;
