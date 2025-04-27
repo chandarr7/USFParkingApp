@@ -78,13 +78,20 @@ const ReservationModal = ({
   // Reset form when modal opens with a new parking spot
   useEffect(() => {
     if (isOpen && parkingSpot) {
+      const license = initialData?.license_plate || "";
       form.reset({
         ...defaultValues,
         parking_spot_id: parkingSpot.id,
-        total_price: totalCost
+        total_price: totalCost,
+        license_plate: license // Ensure license_plate is explicitly set
       });
+      
+      // Trigger validation if we're in edit mode with existing data
+      if (isEditing && license) {
+        form.trigger("license_plate");
+      }
     }
-  }, [isOpen, parkingSpot, totalCost, form, defaultValues]);
+  }, [isOpen, parkingSpot, totalCost, form, defaultValues, isEditing, initialData]);
   
   // Update duration value in form when it changes
   useEffect(() => {
@@ -146,6 +153,15 @@ const ReservationModal = ({
   });
   
   const onSubmit = (data: z.infer<typeof reservationSchema>) => {
+    // Make sure license_plate is properly set before submitting
+    if (!data.license_plate || data.license_plate.trim() === "") {
+      form.setError("license_plate", {
+        type: "manual",
+        message: "License plate is required"
+      });
+      return;
+    }
+    
     data.total_price = totalCost;
     
     if (isEditing) {
@@ -291,8 +307,20 @@ const ReservationModal = ({
                   <FormItem>
                     <FormLabel>License Plate</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your license plate" {...field} />
+                      <Input 
+                        placeholder="Enter your license plate" 
+                        {...field} 
+                        onChange={(e) => {
+                          field.onChange(e.target.value);
+                          form.setValue('license_plate', e.target.value, { shouldValidate: true });
+                        }}
+                      />
                     </FormControl>
+                    {form.formState.errors.license_plate && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {form.formState.errors.license_plate.message}
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
