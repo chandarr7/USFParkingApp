@@ -10,12 +10,15 @@ import Visualizations from "@/pages/Visualizations";
 import MyReservations from "@/pages/MyReservations";
 import Favorites from "@/pages/Favorites";
 import AboutUs from "@/pages/AboutUs";
+import LoginPage from "@/pages/LoginPage";
 import NotFound from "@/pages/not-found";
+import { AuthProvider } from "@/hooks/useAuth2";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Welcome} />
+      <Route path="/login" component={LoginPage} />
       <Route path="/home">
         <Layout>
           <Home />
@@ -53,10 +56,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

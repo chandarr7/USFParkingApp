@@ -8,8 +8,11 @@ import {
   searchSchema,
 } from "@shared/schema";
 import axios from "axios";
+import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication
+  setupAuth(app);
   // Put application routes here
   // All routes are prefixed with /api
 
