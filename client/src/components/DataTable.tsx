@@ -2,25 +2,27 @@ import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z, ZodObject } from "zod";
+import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash, Search, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash, Search, RefreshCw, Info, Filter, SortAsc, SortDesc } from "lucide-react";
 
-interface DataTableProps<T> {
+interface DataTableProps<T extends { id: number }> {
   data: T[];
   columns: ColumnDef<T>[];
   title: string;
-  schema: ZodObject<any>;
+  schema: z.ZodObject<any>;
   onAdd: (data: any) => Promise<void>;
   onUpdate: (id: number, data: any) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
   onRefresh?: () => void;
+  emptyMessage?: string;
 }
 
 interface ColumnDef<T> {
@@ -28,6 +30,7 @@ interface ColumnDef<T> {
   header: string;
   accessorKey: keyof T | ((row: T) => any);
   cell?: (info: { row: T }) => React.ReactNode;
+  sortable?: boolean;
 }
 
 enum DialogMode {
@@ -45,11 +48,17 @@ export function DataTable<T extends { id: number }>({
   onAdd,
   onUpdate,
   onDelete,
-  onRefresh
+  onRefresh,
+  emptyMessage = "No results found."
 }: DataTableProps<T>) {
   const [dialogMode, setDialogMode] = useState<DialogMode>(DialogMode.None);
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sorting, setSorting] = useState<{ column: string | null; direction: 'asc' | 'desc' | null }>({
+    column: null,
+    direction: null
+  });
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   
   const form = useForm<z.infer<typeof schema>>({
@@ -84,6 +93,7 @@ export function DataTable<T extends { id: number }>({
   };
 
   const handleSubmit = async (values: z.infer<typeof schema>) => {
+    setIsProcessing(true);
     try {
       if (dialogMode === DialogMode.Add) {
         await onAdd(values);
@@ -99,18 +109,30 @@ export function DataTable<T extends { id: number }>({
         });
       }
       handleCloseDialog();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to ${dialogMode === DialogMode.Add ? 'add' : 'update'} ${title.toLowerCase()}`,
+        description: error?.message || `Failed to ${dialogMode === DialogMode.Add ? 'add' : 'update'} ${title.toLowerCase()}`,
         variant: "destructive",
       });
+      // Show validation errors if they exist in the response
+      if (error?.errors) {
+        for (const field in error.errors) {
+          form.setError(field as any, { 
+            type: "server", 
+            message: error.errors[field] 
+          });
+        }
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleConfirmDelete = async () => {
     if (!selectedItem) return;
     
+    setIsProcessing(true);
     try {
       await onDelete(selectedItem.id);
       toast({
@@ -118,15 +140,34 @@ export function DataTable<T extends { id: number }>({
         description: `${title} deleted successfully`,
       });
       handleCloseDialog();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to delete ${title.toLowerCase()}`,
+        description: error?.message || `Failed to delete ${title.toLowerCase()}`,
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
+  const handleSort = (columnId: string) => {
+    if (sorting.column === columnId) {
+      // Toggle direction if already sorting by this column
+      if (sorting.direction === 'asc') {
+        setSorting({ column: columnId, direction: 'desc' });
+      } else if (sorting.direction === 'desc') {
+        setSorting({ column: null, direction: null }); // Clear sorting
+      } else {
+        setSorting({ column: columnId, direction: 'asc' });
+      }
+    } else {
+      // Start with ascending sort for new column
+      setSorting({ column: columnId, direction: 'asc' });
+    }
+  };
+
+  // Filter data based on search term
   const filteredData = data.filter(item => {
     if (!searchTerm) return true;
     
@@ -135,6 +176,38 @@ export function DataTable<T extends { id: number }>({
       if (value === null || value === undefined) return false;
       return String(value).toLowerCase().includes(searchTerm.toLowerCase());
     });
+  });
+  
+  // Sort data if needed
+  const sortedData = [...filteredData].sort((a, b) => {
+    if (!sorting.column || !sorting.direction) return 0;
+    
+    // Find the column definition
+    const column = columns.find(col => col.id === sorting.column);
+    if (!column) return 0;
+    
+    // Get values to compare based on accessorKey
+    let aValue: any;
+    let bValue: any;
+    
+    if (typeof column.accessorKey === 'function') {
+      aValue = column.accessorKey(a);
+      bValue = column.accessorKey(b);
+    } else {
+      aValue = a[column.accessorKey];
+      bValue = b[column.accessorKey];
+    }
+    
+    // Convert to string for comparison if not numbers
+    if (typeof aValue !== 'number') aValue = String(aValue).toLowerCase();
+    if (typeof bValue !== 'number') bValue = String(bValue).toLowerCase();
+    
+    // Compare based on direction
+    if (sorting.direction === 'asc') {
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+    } else {
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+    }
   });
 
   return (
@@ -167,20 +240,33 @@ export function DataTable<T extends { id: number }>({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.id}>{column.header}</TableHead>
+                <TableHead 
+                  key={column.id}
+                  className={column.sortable ? "cursor-pointer select-none" : ""}
+                  onClick={column.sortable ? () => handleSort(column.id) : undefined}
+                >
+                  <div className="flex items-center space-x-1">
+                    <span>{column.header}</span>
+                    {column.sortable && sorting.column === column.id && (
+                      sorting.direction === 'asc' ? 
+                        <SortAsc className="h-4 w-4" /> : 
+                        <SortDesc className="h-4 w-4" />
+                    )}
+                  </div>
+                </TableHead>
               ))}
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData.length === 0 ? (
+            {sortedData.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={columns.length + 1} className="h-24 text-center">
-                  No results found.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             ) : (
-              filteredData.map((row) => (
+              sortedData.map((row) => (
                 <TableRow key={row.id}>
                   {columns.map((column) => (
                     <TableCell key={column.id}>
@@ -274,20 +360,29 @@ export function DataTable<T extends { id: number }>({
                                   field.onChange(e.target.value);
                                 }
                               }}
+                              disabled={isProcessing}
                             />
                           )}
                         </FormControl>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 );
               })}
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={handleCloseDialog}>
+                <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={isProcessing}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {dialogMode === DialogMode.Add ? 'Add' : 'Update'}
+                <Button type="submit" disabled={isProcessing}>
+                  {isProcessing ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      {dialogMode === DialogMode.Add ? 'Adding...' : 'Updating...'}
+                    </>
+                  ) : (
+                    dialogMode === DialogMode.Add ? 'Add' : 'Update'
+                  )}
                 </Button>
               </DialogFooter>
             </form>
@@ -305,11 +400,18 @@ export function DataTable<T extends { id: number }>({
             <p>Are you sure you want to delete this {title.toLowerCase()}? This action cannot be undone.</p>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleCloseDialog}>
+            <Button type="button" variant="outline" onClick={handleCloseDialog} disabled={isProcessing}>
               Cancel
             </Button>
-            <Button type="button" variant="destructive" onClick={handleConfirmDelete}>
-              Delete
+            <Button type="button" variant="destructive" onClick={handleConfirmDelete} disabled={isProcessing}>
+              {isProcessing ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
