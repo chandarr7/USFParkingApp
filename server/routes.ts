@@ -9,10 +9,15 @@ import {
 } from "@shared/schema";
 import axios from "axios";
 import { setupAuth } from "./auth";
+import { setupStripeRoutes } from "./stripe";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
+  
+  // Set up Stripe payment routes
+  setupStripeRoutes(app);
+  
   // Put application routes here
   // All routes are prefixed with /api
 
