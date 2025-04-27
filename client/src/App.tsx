@@ -11,6 +11,7 @@ import MyReservations from "@/pages/MyReservations";
 import Favorites from "@/pages/Favorites";
 import AboutUs from "@/pages/AboutUs";
 import LoginPage from "@/pages/LoginPage";
+import PaymentHistory from "@/pages/PaymentHistory";
 import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/hooks/useAuth2";
 
@@ -42,6 +43,11 @@ function Router() {
       <Route path="/about">
         <Layout>
           <AboutUs />
+        </Layout>
+      </Route>
+      <Route path="/payment-history">
+        <Layout>
+          <PaymentHistory />
         </Layout>
       </Route>
       <Route>

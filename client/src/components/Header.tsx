@@ -17,6 +17,12 @@ const Header = () => {
     { path: "/about", label: "About" }
   ];
   
+  // Additional routes for authenticated users
+  const authRoutes = [
+    { path: "/reservations", label: "My Reservations" },
+    { path: "/payment-history", label: "Payment History" }
+  ];
+  
   const handleLogout = async () => {
     try {
       await logout();
@@ -45,6 +51,20 @@ const Header = () => {
         
         <div className="hidden md:flex space-x-8">
           {routes.map((route) => (
+            <Link 
+              key={route.path} 
+              href={route.path}
+              className={`py-2 border-b-2 ${
+                isCurrentPath(route.path) 
+                  ? "border-white" 
+                  : "border-transparent hover:border-white transition-colors duration-200"
+              }`}
+            >
+              {route.label}
+            </Link>
+          ))}
+          
+          {user && authRoutes.map((route) => (
             <Link 
               key={route.path} 
               href={route.path}
@@ -117,6 +137,27 @@ const Header = () => {
                     {route.label}
                   </Link>
                 ))}
+                
+                {user && (
+                  <>
+                    <hr className="my-4" />
+                    {authRoutes.map((route) => (
+                      <Link 
+                        key={route.path} 
+                        href={route.path}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`py-2 text-lg ${
+                          isCurrentPath(route.path) 
+                            ? "text-[#006747] font-medium" 
+                            : "text-gray-600 hover:text-[#006747]"
+                        }`}
+                      >
+                        {route.label}
+                      </Link>
+                    ))}
+                  </>
+                )}
+                
                 <hr className="my-4" />
                 {user ? (
                   <>
