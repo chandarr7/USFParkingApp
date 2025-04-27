@@ -67,7 +67,7 @@ const Header = () => {
                 className="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 text-white rounded-full"
               >
                 <User className="h-4 w-4" />
-                <span className="text-sm">{user.name}</span>
+                <span className="text-sm">{user?.name || 'User'}</span>
               </Button>
               <Button 
                 variant="ghost" 
@@ -122,7 +122,7 @@ const Header = () => {
                   <>
                     <div className="flex items-center space-x-2">
                       <User className="h-4 w-4 text-[#006747]" />
-                      <div className="font-medium">{user.name}</div>
+                      <div className="font-medium">{user?.name || 'User'}</div>
                     </div>
                     <Button 
                       variant="outline" 
