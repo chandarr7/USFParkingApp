@@ -12,7 +12,10 @@ import {
   type InsertReservation,
   favorites,
   type Favorite,
-  type InsertFavorite
+  type InsertFavorite,
+  payments,
+  type Payment,
+  type InsertPayment
 } from "@shared/schema";
 
 export interface IStorage {
@@ -34,6 +37,7 @@ export interface IStorage {
   createReservation(reservation: InsertReservation): Promise<Reservation>;
   updateReservation(id: number, reservation: Partial<InsertReservation>): Promise<Reservation | undefined>;
   deleteReservation(id: number): Promise<boolean>;
+  updateReservationPaymentId(id: number, paymentId: number): Promise<Reservation | undefined>;
   
   // Favorite operations
   getFavorites(userId: number): Promise<Favorite[]>;
@@ -41,6 +45,13 @@ export interface IStorage {
   createFavorite(favorite: InsertFavorite): Promise<Favorite>;
   deleteFavorite(id: number): Promise<boolean>;
   isFavorite(userId: number, parkingSpotId: number): Promise<boolean>;
+  
+  // Payment operations
+  getPayments(userId?: number): Promise<Payment[]>;
+  getPayment(id: number): Promise<Payment | undefined>;
+  getPaymentByStripeId(stripePaymentIntentId: string): Promise<Payment | undefined>;
+  createPayment(payment: InsertPayment): Promise<Payment>;
+  updatePaymentStatus(id: number, status: string): Promise<Payment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -186,6 +197,51 @@ export class DatabaseStorage implements IStorage {
         )
       );
     return !!favorite;
+  }
+
+  // Additional reservation method for payments
+  async updateReservationPaymentId(id: number, paymentId: number): Promise<Reservation | undefined> {
+    const [updatedReservation] = await db
+      .update(reservations)
+      .set({ payment_id: paymentId })
+      .where(eq(reservations.id, id))
+      .returning();
+    return updatedReservation || undefined;
+  }
+
+  // Payment operations
+  async getPayments(userId?: number): Promise<Payment[]> {
+    if (userId) {
+      return await db.select().from(payments).where(eq(payments.user_id, userId));
+    }
+    return await db.select().from(payments);
+  }
+
+  async getPayment(id: number): Promise<Payment | undefined> {
+    const [payment] = await db.select().from(payments).where(eq(payments.id, id));
+    return payment || undefined;
+  }
+
+  async getPaymentByStripeId(stripePaymentIntentId: string): Promise<Payment | undefined> {
+    const [payment] = await db
+      .select()
+      .from(payments)
+      .where(eq(payments.stripe_payment_intent_id, stripePaymentIntentId));
+    return payment || undefined;
+  }
+
+  async createPayment(insertPayment: InsertPayment): Promise<Payment> {
+    const [payment] = await db.insert(payments).values(insertPayment).returning();
+    return payment;
+  }
+
+  async updatePaymentStatus(id: number, status: string): Promise<Payment | undefined> {
+    const [updatedPayment] = await db
+      .update(payments)
+      .set({ payment_status: status })
+      .where(eq(payments.id, id))
+      .returning();
+    return updatedPayment || undefined;
   }
 }
 
